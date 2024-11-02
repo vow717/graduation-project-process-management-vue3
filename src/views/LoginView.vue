@@ -17,7 +17,7 @@ import {
   Watermelon
 } from '@element-plus/icons-vue'
 
-import { loginGuardService } from '@/services/LoginService'
+import { CommonService } from '@/services/index'
 import { ref } from 'vue'
 
 const userForm = ref({
@@ -41,7 +41,7 @@ const loginF = async () => {
     password: userForm.value.password
   }
   resetUser()
-  await loginGuardService(user)
+  await CommonService.loginGuardService(user)
 }
 </script>
 <template>

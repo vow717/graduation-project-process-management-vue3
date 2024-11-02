@@ -1,4 +1,4 @@
 <script setup lang="ts"></script>
 <template>
-  <div>admin</div>
+  <div></div>
 </template>

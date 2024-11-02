@@ -1,37 +1,90 @@
-import { createElNotificationError, createElNotificationSuccess } from '@/components/message'
+import { createElNotificationSuccess } from '@/components/message'
 import * as Consty from '@/datasource/const'
+import { CommonService } from '@/services'
 import { type RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
+
+declare module 'vue-router' {
+  interface RouteMeta {
+    roles?: string[]
+  }
+}
+
 const routes: RouteRecordRaw[] = [
   {
     path: '/:pathMatch(.*)*',
     redirect: '/login'
   },
   {
-    name: 'Login',
+    path: '',
+    component: () => import('@/views/LoginView.vue')
+  },
+  {
     path: '/login',
     component: () => import('@/views/LoginView.vue')
   },
   {
-    path: '/nav',
-    component: () => import('@/views/navView.vue')
-  },
-  {
-    name: 'User',
-    path: '/user',
-    meta: { role: Consty.USER },
-    component: () => import('@/views/user/IndexView.vue'),
-    beforeEnter: () => {
-      createElNotificationSuccess('用户您好')
-    }
-  },
-  {
-    name: 'Admin',
-    path: '/admin',
-    meta: { role: Consty.ADMIN },
-    component: () => import('@/views/admin/IndexView.vue'),
-    beforeEnter: () => {
-      createElNotificationSuccess('管理员您好')
-    }
+    path: '/',
+    component: () => import('@/views/IndexView.vue'),
+    meta: {
+      roles: [Consty.ADMIN, Consty.STUDENT, Consty.TEACHER]
+    },
+    children: [
+      {
+        path: 'settings',
+        component: () => import('@/views/header/SettingView.vue')
+      },
+      {
+        name: 'Student',
+        path: 'student',
+        meta: { roles: [Consty.STUDENT] },
+        component: () => import('@/views/student/IndexView.vue'),
+        beforeEnter: () => {
+          createElNotificationSuccess('同学您好')
+        },
+        children: [
+          {
+            path: '',
+            component: () => import('@/views/student/TutorView.vue')
+          },
+          {
+            path: 'process',
+            component: () => import('@/views/student/ProcessView.vue')
+          }
+        ]
+      },
+      {
+        name: 'Teacher',
+        path: 'teacher',
+        meta: { roles: [Consty.TEACHER] },
+        component: () => import('@/views/teacher/IndexView.vue'),
+        beforeEnter: () => {
+          createElNotificationSuccess('老师您好')
+        },
+        children: [
+          {
+            path: '',
+            component: () => import('@/views/teacher/TutorStudentView.vue')
+          },
+          {
+            path: 'scores',
+            component: () => import('@/views/teacher/GroupScoringsView.vue')
+          },
+          {
+            path: 'processes/:pid/types/:auth',
+            component: () => import('@/views/teacher/ProcessView.vue')
+          }
+        ]
+      },
+      {
+        name: 'Admin',
+        path: 'admin',
+        meta: { roles: [Consty.ADMIN] },
+        component: () => import('@/views/admin/IndexView.vue'),
+        beforeEnter: () => {
+          createElNotificationSuccess('管理员您好')
+        }
+      }
+    ]
   }
 ]
 
@@ -39,24 +92,22 @@ const router = createRouter({
   // HTML5 Mode。createWebHistory()函数，生产环境下需要web容器完成转发
   // createWebHashHistory()函数仍使用#符号，无需配置
   // history: createWebHistory(import.meta.env.BASE_URL),
-  history: createWebHistory(),
-  routes
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: routes
 })
 
 //路由守卫建立：
-router.beforeEach((to, from) => {
-  if (!to.meta.role) {
+router.beforeEach((to) => {
+  if (!to.meta.roles) {
     return true
   }
-  if (to.meta.role != sessionStorage.getItem('role')) {
-    createElNotificationError('暂无权限')
-    // 直接返回路由地址
-    // return '/login'
-    // 支持返回路由对象
-    return { name: 'Login' }
-  }
 
-  return true
+  const role = to.meta.roles!.find((r) => r == CommonService.getRole())
+  if (role) {
+    return true
+  }
+  sessionStorage.clear()
+  return '/login'
 })
 
 export default router

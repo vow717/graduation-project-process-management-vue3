@@ -4,7 +4,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 //不要忘了配置mock
-import('@/mock/index')
+//import('@/mock/index')
 
 import { createAlertDialog } from '@/components/message/index'
 
