@@ -47,7 +47,7 @@ const routes: RouteRecordRaw[] = [
             component: () => import('@/views/student/TutorView.vue')
           },
           {
-            path: 'process',
+            path: 'processes/:pid',
             component: () => import('@/views/student/ProcessView.vue')
           }
         ]
@@ -72,6 +72,10 @@ const routes: RouteRecordRaw[] = [
           {
             path: 'processes/:pid/types/:auth',
             component: () => import('@/views/teacher/ProcessView.vue')
+          },
+          {
+            path: 'functions',
+            component: () => import('@/views/teacher/functions/Index.vue')
           }
         ]
       },

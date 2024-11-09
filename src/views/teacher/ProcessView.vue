@@ -14,6 +14,7 @@ import { TeacherService } from '@/services/TeacherService'
 import { useUserStore } from '@/stores/UserStore'
 import { defineAsyncComponent, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import GroupTeachersView from './GroupTeachersView.vue'
 const params = useRoute().params as { pid: string; auth: string }
 const userS = useUserStore().userS
 const result = await Promise.all([
@@ -140,6 +141,7 @@ const closeF = () => (gradingDialogVisable.value = false)
 </script>
 <template>
   <div>
+    <GroupTeachersView />
     <div>
       优秀
       <el-tag>{{ levelCount.score_90 }}</el-tag>

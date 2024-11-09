@@ -9,7 +9,6 @@ import { storeCacheFactory } from './decorators/decorators'
 export class CommonService {
   static loginGuardService = async (user: User) => {
     const resp = await usePost<User>('login', user)
-    console.log('111')
     const us = resp.data.value?.data
     const token = resp.response.value?.headers.get('token')
     const role = resp.response.value?.headers.get('role')

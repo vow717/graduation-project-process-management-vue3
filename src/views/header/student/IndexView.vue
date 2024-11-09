@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Process } from '@/datasource/type'
 import { CommonService } from '@/services'
 import { ref } from 'vue'
 
@@ -8,7 +9,11 @@ const menus = [
     path: '/student'
   }
 ]
-const processesS = await CommonService.listProcessesService()
+const processesS = ref<Process[]>()
+processesS.value = await CommonService.listProcessesService()
+watchEffect(async () => {
+  processesS.value = await CommonService.listProcessesService()
+})
 
 processesS.value?.forEach((pr) => {
   menus.push({ name: pr.name!, path: `/student/processes/${pr.id}` })

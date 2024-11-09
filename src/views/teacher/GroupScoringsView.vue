@@ -20,10 +20,10 @@ const result = await Promise.all([
   TeacherService.listGroupStudentsService()
 ])
 const processes = ref<Process[]>()
-processes.value = result[0]
 const processScores = ref<ProcessScore[]>()
-processScores.value = result[1]
 const students = ref<User[]>()
+processes.value = result[0]
+processScores.value = result[1]
 students.value = result[2]
 
 const studentsScores: StudentScore[] = []
