@@ -4,15 +4,27 @@ import { CommonService } from '@/services'
 import { Edit } from '@element-plus/icons-vue'
 import { ref, watchEffect } from 'vue'
 import AddProcess from './processmanage/AddProcess.vue'
-import { createChangeProcessDialog } from './processmanage/createChangeProcess'
+import { createChangeProcessDialog } from './processmanage/CreateChangeProcess'
 
 const processesS = ref<Process[]>()
+processesS.value = await CommonService.listProcessesService()
 watchEffect(async () => {
   processesS.value = await CommonService.listProcessesService()
 })
 const changeProcessF = (process: Process) => {
-  createChangeProcessDialog(process)
+  createChangeProcessDialog(process, allPoint.value)
 }
+let allPoint = ref(100)
+watch(
+  processesS,
+  () => {
+    allPoint.value = 100
+    for (const process of processesS.value!) {
+      allPoint.value -= process.point ? process.point : 0
+    }
+  },
+  { immediate: true }
+)
 </script>
 <template>
   <div style="margin: 10px">

@@ -167,7 +167,7 @@ const pointOk = computed(() => {
       <el-button
         type="success"
         @click="addProcessF"
-        :disabled="!pointOk || !processR.name || !processR.auth || !processR.point"
+        :disabled="!pointOk || !processR.name || !processR.auth || processR.point != null"
         >确定</el-button
       >
     </template>

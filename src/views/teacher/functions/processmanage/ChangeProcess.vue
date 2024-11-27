@@ -7,6 +7,7 @@ import { ElButton, ElCol, ElDialog, ElInput, ElOption, ElRow, ElSelect } from 'e
 import { computed, ref, render } from 'vue'
 const prop = defineProps<{
   process: Process
+  allPoint: number
 }>()
 
 const dialogVisible = ref(true)
@@ -185,10 +186,11 @@ const closeF = () => render(null, document.body)
     <template #footer>
       <el-button type="primary" @click="dialogVisible = false">返回并取消</el-button>
       <el-button type="warning" @click="delProcessF">删除此过程</el-button>
+      <p>prop.allpoin:{{ prop.allPoint }}</p>
       <el-button
         type="success"
         @click="addProcessF"
-        :disabled="!pointOk || !processR.name || !processR.auth || !processR.point"
+        :disabled="!pointOk || !processR.name || !processR.auth || processR.point! > prop.allPoint"
         >确定</el-button
       >
     </template>

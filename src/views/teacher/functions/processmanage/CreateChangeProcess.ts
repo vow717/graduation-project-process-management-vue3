@@ -1,10 +1,10 @@
 import type { Process } from '@/datasource/type'
 import { defineAsyncComponent, h, render } from 'vue'
 
-export const createChangeProcessDialog = (process: Process) => {
+export const createChangeProcessDialog = (process: Process, allPoint: number) => {
   const node = h(
     defineAsyncComponent(() => import('./ChangeProcess.vue')),
-    { process }
+    { process, allPoint }
   )
   render(node, document.body)
 }
