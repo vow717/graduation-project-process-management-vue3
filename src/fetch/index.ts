@@ -47,6 +47,7 @@ export const useFetch = createFetch({
     },
     afterFetch: (ctx) => {
       const data: ResultVO<{}> = ctx.data
+      console.log('afFetch:{}', ctx)
       if (data.code != 200) {
         return Promise.reject(data.message)
       }
@@ -55,6 +56,7 @@ export const useFetch = createFetch({
       return ctx
     },
     onFetchError: (ctx) => {
+      console.log('error:{}', ctx)
       createAlertDialog(ctx.error)
       return Promise.reject(ctx.error)
     }

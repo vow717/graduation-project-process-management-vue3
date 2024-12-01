@@ -42,6 +42,7 @@ const loginF = async () => {
   }
   resetUser()
   await CommonService.loginGuardService(user)
+  console.log('login success')
 }
 </script>
 <template>

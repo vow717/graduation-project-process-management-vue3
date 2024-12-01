@@ -3,7 +3,6 @@ import { PA_REVIEW } from '@/datasource/const'
 import type {
   LevelCount,
   Process,
-  ProcessFile,
   ProcessScore,
   PSDetailTeacher,
   StudentProcessScore,
@@ -22,18 +21,19 @@ const result = await Promise.all([
     ? TeacherService.listGroupStudentsService()
     : TeacherService.listTutorStudentsService(),
   TeacherService.listProcessesProcessScoresService(params.pid, params.auth),
-  CommonService.listProcessesService(),
-  TeacherService.listProcessFilesService(params.pid, params.auth)
+  CommonService.listProcessesService()
+  // TeacherService.listProcessFilesService(params.pid, params.auth)
 ])
 const studentsS = ref<User[]>()
 const processscoresS = ref<ProcessScore[]>()
 const processesS = ref<Process[]>()
-const processFilesS = ref<ProcessFile[]>()
+// const processFilesS = ref<ProcessFile[]>()
 studentsS.value = result[0]
 processscoresS.value = result[1]
 processesS.value = result[2]
-processFilesS.value = result[3]
+// processFilesS.value = result[3]
 
+console.log('result:{}', result)
 const levelCount = ref<LevelCount>({
   score_last: 0,
   score_60: 0,

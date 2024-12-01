@@ -79,7 +79,6 @@ const submitF = () => {
   psDetailR.value.teacherName = userS.value.name
   scoreInfoR.value.detail = toRaw(psDetailR.value)
   currentTeacherScore && (scoreInfoR.value.id = currentTeacherScore.processScoreId)
-  console.log('!')
   props.addProcessScore(toRaw(scoreInfoR.value))
   props.close()
 }
