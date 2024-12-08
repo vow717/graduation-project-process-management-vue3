@@ -13,6 +13,10 @@ const components: { name: string; component: Component }[] = [
   {
     name: '分配学生',
     component: defineAsyncComponent(() => import('./DistributeStudenstToTeachers.vue'))
+  },
+  {
+    name: '分组学生',
+    component: defineAsyncComponent(() => import('./GroupingStudentsView.vue'))
   }
 ]
 
