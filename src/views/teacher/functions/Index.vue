@@ -5,6 +5,14 @@ const components: { name: string; component: Component }[] = [
   {
     name: '过程管理',
     component: defineAsyncComponent(() => import('./ProcessesView.vue'))
+  },
+  {
+    name: '导入学生',
+    component: defineAsyncComponent(() => import('./ImportStudentsView.vue'))
+  },
+  {
+    name: '分配学生',
+    component: defineAsyncComponent(() => import('./DistributeStudenstToTeachers.vue'))
   }
 ]
 

@@ -40,14 +40,14 @@ export const useFetch = createFetch({
       if (token) {
         options.headers = {
           ...options.headers,
-          token: token
+          token: token,
+          'Content-Type': 'application/json' //content-type是请求头的一种，用来指定请求体的格式
         }
       }
       return { options }
     },
     afterFetch: (ctx) => {
       const data: ResultVO<{}> = ctx.data
-      console.log('afFetch:{}', ctx)
       if (data.code != 200) {
         return Promise.reject(data.message)
       }
@@ -68,15 +68,19 @@ export async function usePost<T>(url: string, data: unknown) {
   await resp.execute(true)
   return resp
 }
-
+export async function usePatch<T>(url: string, data: unknown) {
+  const resp = useFetch(url, { immediate: false }).patch(data).json<ResultVO<T>>()
+  await resp.execute(true)
+  return resp
+}
 export async function useGet<T>(url: string) {
   const resp = useFetch(url, { immediate: false }).get().json<ResultVO<T>>()
   await resp.execute(true)
   return resp
 }
 
-export async function useDelete<T>(url: string, data: unknown) {
-  const resp = useFetch(url, { immediate: false }).delete(data).json<ResultVO<T>>()
+export async function useDelete<T>(url: string) {
+  const resp = useFetch(url, { immediate: false }).delete().json<ResultVO<T>>()
   await resp.execute(true)
   return resp
 }

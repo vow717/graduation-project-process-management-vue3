@@ -1,5 +1,5 @@
 import type { Process, ProcessFile, ProcessScore, User } from '@/datasource/type'
-import { useDelete, useGet, usePost } from '@/fetch'
+import { useDelete, useGet, usePatch, usePost } from '@/fetch'
 import { useInfosStore } from '@/stores/InfosStore'
 import { useProcessInfosStore } from '@/stores/ProcessInfosStore'
 import { useProcessStore } from '@/stores/ProcessStore'
@@ -11,6 +11,47 @@ import {
   storeCacheMapFactory
 } from './decorators/decorators'
 export class TeacherService {
+  //获取本专业所有老师
+  @storeCacheFactory(useUsersStore().allTeachersS)
+  @ELLoading()
+  static async listAllTeachersService() {
+    const data = await useGet<User[]>('teacher/teachers')
+    return data.data.value?.data as unknown as User[]
+  }
+
+  //获取本专业所有学生
+  @storeCacheFactory(useUsersStore().allStudentsS)
+  @ELLoading()
+  static async listAllStudentsService() {
+    const data = await useGet<User[]>('teacher/students')
+    return data.data.value?.data as unknown as User[]
+  }
+
+  //添加多个学生
+  @storeCacheFactory(useUsersStore().allStudentsS)
+  @ELLoading()
+  static async addStudentsService(users: User[]) {
+    // 遍历users数组，将student属性转换为字符串，因为student属性是一个对象，需要转换为字符串，如果student属性为空，则不需要转换
+    users.forEach((u) => {
+      // //@ts-ignore是忽略ts检查的语法，因为student属性是自定义的，ts无法识别，所以需要忽略检查
+      //@ts-ignore
+      u.student && (u.student = JSON.stringify(u.student))
+    })
+    const data = await usePost<User[]>('teacher/students', JSON.stringify(users))
+    return data.data.value?.data as unknown as User[]
+  }
+  //修改多个学生的信息
+  @ClearStoreCache(useUsersStore().clear)
+  @storeCacheFactory(useUsersStore().allStudentsS)
+  @ELLoading()
+  static async updateStudentsService(users: User[]) {
+    users.forEach((u) => {
+      //@ts-ignore
+      u.student && (u.student = JSON.stringify(u.student))
+    })
+    const data = await usePatch<User[]>('teacher/students', JSON.stringify(users))
+    return data.data.value?.data as unknown as User[]
+  }
   //获取指导学生
   @storeCacheFactory(useUsersStore().tutorStudentsS)
   @ELLoading()
@@ -78,7 +119,7 @@ export class TeacherService {
   @storeCacheFactory(useProcessStore().processesS, false)
   @ELLoading()
   static async delProcessService(pid: string) {
-    const data = await useDelete<Process[]>(`teacher/processes/${pid}`, pid)
+    const data = await useDelete<Process[]>(`teacher/processes/${pid}`)
     return data.data.value?.data as unknown as Process[]
   }
 }
