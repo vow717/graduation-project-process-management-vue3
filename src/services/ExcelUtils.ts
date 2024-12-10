@@ -80,7 +80,7 @@ export function exportGroupExcelFile(map: Map<number, any[]>, filename: string) 
   const workbook = XLSX.utils.book_new()
   console.log(map)
   map.forEach((value, key) => {
-    const students = value[1].map((stu) => {
+    const students = value[0].map((stu) => {
       console.log(stu)
       return {
         序号: stu.queueNumber,

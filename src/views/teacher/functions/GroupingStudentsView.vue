@@ -1,8 +1,4 @@
 <script setup lang="ts">
-//有1 2 3三个组，全部学生最好要平均分配到三个组里面，并且学生的导师和学生不能再同一group组里
-let groupCount = 3
-let chooseGroup = [1, 2, 3]
-
 import { createElNotificationSuccess } from '@/components/message'
 import type { User } from '@/datasource/type'
 import { exportGroupExcelFile } from '@/services/ExcelUtils'
@@ -20,6 +16,15 @@ const result = await Promise.all([
 studentsR.value = result[0]
 teachersR.value = result[1]
 
+//有1 2 3。。。多个组，全部学生最好要平均分配到这些个组里面，并且学生的导师和学生不能再同一group组里
+let groupCount = 0
+let allChooseGroup: number[] = []
+teachersR.value.forEach((teacher) => {
+  groupCount = Math.max(groupCount, teacher.groupNumber ?? 0)
+})
+for (let i = 1; i <= groupCount; i++) {
+  allChooseGroup.push(i)
+}
 //根据教师找到教师所在的组并返回这个组以至于后面排除它进行分配
 const cutTeacherGroup = (teacherName: string) => {
   let group = 0
@@ -33,25 +38,19 @@ const cutTeacherGroup = (teacherName: string) => {
   return group
 }
 
-let mapGroup = ref<Map<number, User[]>>(
-  new Map<number, User[]>([
-    [1, []],
-    [2, []],
-    [3, []]
-  ])
-)
+let mapGroup = ref<Map<number, User[]>>(new Map())
 //当前显示的组,默认显示第一组,字符串类型，为了和el-tabs的name(只能是字符串)对应，然后parseInt转换为数字
 const currentShowGroup = ref<string>('0')
 
 const groupStudentsF = () => {
   //事先清空mapGroup和updateStudentsR以便重新分配,并且重置chooseGroup
-  mapGroup.value = new Map<number, User[]>([
-    [1, []],
-    [2, []],
-    [3, []]
-  ])
+  mapGroup.value = new Map()
+  for (let i = 1; i <= groupCount; i++) {
+    mapGroup.value.set(i, [])
+  }
   updateStudentsR.value = []
-  chooseGroup = [1, 2, 3]
+  //复制一份allChooseGroup，因为后面会删除chooseGroup中的元素
+  let chooseGroup = [...allChooseGroup]
 
   //给学生打乱一下顺序
   studentsR.value = studentsR.value.sort(() => Math.random() - 0.5)
@@ -107,13 +106,12 @@ const submitF = async () => {
   createElNotificationSuccess('分组成功')
 }
 const downloadF = () => {
-  const data = [
-    [1, []],
-    [2, []],
-    [3, []]
-  ]
+  const data: [any[]][] = []
+  for (let i = 1; i <= groupCount; i++) {
+    data.push([[]])
+  }
   studentsR.value.forEach((student) => {
-    data[student.groupNumber - 1][1].push({
+    data[student.groupNumber - 1][0].push({
       number: student.number,
       name: student.name,
       teacherName: student.student?.teacherName,
