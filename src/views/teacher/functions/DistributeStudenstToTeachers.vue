@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { createElNotificationSuccess } from '@/components/message'
 import type { User } from '@/datasource/type'
+import { exportStudentsExcelFile } from '@/services/ExcelUtils'
 import { TeacherService } from '@/services/TeacherService'
 import { ref } from 'vue'
 //方便展示各老师的分配结果
@@ -114,14 +115,20 @@ const submitF = async () => {
       })
     })
   })
-  console.log('vue:,updateStudentsR.value', updateStudentsR.value)
   await TeacherService.updateStudentsService(updateStudentsR.value)
   createElNotificationSuccess('学生分配提交成功')
+}
+
+const downloadF = () => {
+  exportStudentsExcelFile(allStudentsR.value, '学生-老师分配结果')
 }
 </script>
 <template>
   <el-button type="primary" @click="allDistributeF"> 随机分配</el-button>
   <el-button type="success" @click="submitF">提交</el-button>
+  <el-button type="success" @click="downloadF" :disabled="allStudentsR.length === 0">
+    导出学生-老师分配结果
+  </el-button>
   <div>
     <div v-for="teacher in teachersR" :key="teacher.id">
       <p>{{ teacher.name }}/{{ teacher.total }}</p>

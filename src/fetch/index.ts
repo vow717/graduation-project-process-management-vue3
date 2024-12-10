@@ -73,6 +73,11 @@ export async function usePatch<T>(url: string, data: unknown) {
   await resp.execute(true)
   return resp
 }
+export async function usePut<T>(url: string) {
+  const resp = useFetch(url, { immediate: false }).put().json<ResultVO<T>>()
+  await resp.execute(true)
+  return resp
+}
 export async function useGet<T>(url: string) {
   const resp = useFetch(url, { immediate: false }).get().json<ResultVO<T>>()
   await resp.execute(true)

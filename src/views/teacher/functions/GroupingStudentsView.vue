@@ -1,10 +1,11 @@
 <script setup lang="ts">
 //有1 2 3三个组，全部学生最好要平均分配到三个组里面，并且学生的导师和学生不能再同一group组里
-const groupCount = 3
+let groupCount = 3
 let chooseGroup = [1, 2, 3]
 
 import { createElNotificationSuccess } from '@/components/message'
 import type { User } from '@/datasource/type'
+import { exportGroupExcelFile } from '@/services/ExcelUtils'
 import { TeacherService } from '@/services/TeacherService'
 import { ref } from 'vue'
 
@@ -52,18 +53,28 @@ const groupStudentsF = () => {
   updateStudentsR.value = []
   chooseGroup = [1, 2, 3]
 
+  //给学生打乱一下顺序
+  studentsR.value = studentsR.value.sort(() => Math.random() - 0.5)
+
   studentsR.value.forEach((student) => {
     let chooseGroupCopy = [...chooseGroup]
     let group = cutTeacherGroup(student.student?.teacherName ?? '')
     chooseGroupCopy = chooseGroupCopy.filter((g) => g !== group)
     let groupNumber = chooseGroupCopy[Math.floor(Math.random() * chooseGroupCopy.length)]
     //有一种情况，就是除了该学生所在组之外的两个组，都大于所规定的最大学生数而被剔除了，那么这个groupNumber就会是undefined，所以导致已分配的学生数量不等于总共学生数量，这样我们不能让操作者提交
+    let nowStudent = student
     if (groupNumber) {
-      updateStudentsR.value.push({
+      nowStudent = {
+        number: student.number,
+        groupNumber: groupNumber,
         name: student.name,
-        groupNumber: groupNumber
-      })
-      mapGroup.value.get(groupNumber)?.push(student)
+        student: {
+          ...student.student,
+          queueNumber: mapGroup.value.get(groupNumber)?.length + 1
+        }
+      }
+      updateStudentsR.value.push(nowStudent)
+      mapGroup.value.get(groupNumber)?.push(nowStudent)
       //向上取整：Math.ceil()，向下取整：Math.floor()，四舍五入：Math.round()
       //如果某个组的学生数等于总学生数除以组数，那么就从chooseGroupCopy中暂时删除这个组
       if (mapGroup.value.get(groupNumber)?.length > Math.ceil(studentsCount.value / groupCount)) {
@@ -71,16 +82,11 @@ const groupStudentsF = () => {
       }
     }
   })
-
-  //给1,2,3组都打乱一下学生顺序
-  mapGroup.value.forEach((students) => {
-    students.sort(() => Math.random() - 0.5)
-  })
 }
 
 const GroupTeachersStudentsCount = (groupNum: number) => {
   const result: { teacherName: string; count: number }[] = []
-  teachersR.value.filter((teacher) => teacher.groupNumber === 1)
+
   mapGroup.value.get(groupNum)?.forEach((student) => {
     const teacherName = student.student?.teacherName
     const index = result.findIndex((r) => r.teacherName === teacherName)
@@ -100,14 +106,32 @@ const submitF = async () => {
   await TeacherService.updateStudentsService(updateStudentsR.value)
   createElNotificationSuccess('分组成功')
 }
+const downloadF = () => {
+  const data = [
+    [1, []],
+    [2, []],
+    [3, []]
+  ]
+  studentsR.value.forEach((student) => {
+    data[student.groupNumber - 1][1].push({
+      number: student.number,
+      name: student.name,
+      teacherName: student.student?.teacherName,
+      queueNumber: student.student?.queueNumber,
+      projectTitle: student.student?.projectTitle
+    })
+  })
+  exportGroupExcelFile(data, '学生分组表格')
+}
 </script>
 <template>
   <div>
     <p>
       <el-button type="primary" @click="groupStudentsF">分组</el-button>
-      <el-button type="suceess" :disabled="studentsCount != updateStudentsR.length" @click="submitF"
+      <el-button :disabled="studentsCount != updateStudentsR.length" @click="submitF"
         >提交</el-button
       >
+      <el-button type="success" @click="downloadF">导出学生分组表格</el-button>
     </p>
     <p>总学生数量:{{ studentsCount }}---已分配学生数量:{{ updateStudentsR.length }}</p>
     <p>第一组学生数量{{ mapGroup.get(1)?.length }}</p>

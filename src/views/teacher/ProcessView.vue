@@ -33,7 +33,6 @@ processscoresS.value = result[1]
 processesS.value = result[2]
 // processFilesS.value = result[3]
 
-console.log('result:{}', result)
 const levelCount = ref<LevelCount>({
   score_last: 0,
   score_60: 0,

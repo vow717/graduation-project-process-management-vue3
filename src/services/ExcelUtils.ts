@@ -59,3 +59,42 @@ export function readStudentForSelectionFile(file: Blob) {
     reader.readAsArrayBuffer(file)
   })
 }
+
+//导出学生分配给老师的excel表格
+export function exportStudentsExcelFile(datalist: User[], filename: string) {
+  const data = datalist.map((item, index) => ({
+    序号: index + 1,
+    学号: item.number,
+    学生姓名: item.name,
+    指导教师: item.student?.teacherName
+  }))
+  const worksheet = XLSX.utils.json_to_sheet(data)
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, worksheet, filename)
+
+  XLSX.writeFile(workbook, filename + '.xlsx')
+}
+
+//导出学生分组结果的excel表格
+export function exportGroupExcelFile(map: Map<number, any[]>, filename: string) {
+  const workbook = XLSX.utils.book_new()
+  console.log(map)
+  map.forEach((value, key) => {
+    const students = value[1].map((stu) => {
+      console.log(stu)
+      return {
+        序号: stu.queueNumber,
+        学号: stu.number,
+        姓名: stu.name,
+        指导教师: stu.teacherName,
+        毕设题目: stu.projectTitle
+      }
+    })
+    students.sort((a, b) => a['序号'] - b['序号'])
+    const jsonWorkSheet = XLSX.utils.json_to_sheet(students)
+    jsonWorkSheet['!cols'] = [{ wpx: 50 }, { wpx: 100 }, { wpx: 100 }, { wpx: 100 }, { wpx: 200 }]
+
+    XLSX.utils.book_append_sheet(workbook, jsonWorkSheet, `第${key + 1}组`)
+  })
+  XLSX.writeFile(workbook, filename + '.xlsx')
+}

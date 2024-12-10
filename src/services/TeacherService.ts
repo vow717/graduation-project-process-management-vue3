@@ -1,5 +1,5 @@
 import type { Process, ProcessFile, ProcessScore, User } from '@/datasource/type'
-import { useDelete, useGet, usePatch, usePost } from '@/fetch'
+import { useDelete, useGet, usePatch, usePost, usePut } from '@/fetch'
 import { useInfosStore } from '@/stores/InfosStore'
 import { useProcessInfosStore } from '@/stores/ProcessInfosStore'
 import { useProcessStore } from '@/stores/ProcessStore'
@@ -26,7 +26,11 @@ export class TeacherService {
     const data = await useGet<User[]>('teacher/students')
     return data.data.value?.data as unknown as User[]
   }
-
+  //根据number获取学生消息
+  static async findUserByNumber(number: string) {
+    const data = await useGet<User>(`teacher/users/${number}`)
+    return data.data.value?.data as unknown as User[]
+  }
   //添加多个学生
   @storeCacheFactory(useUsersStore().allStudentsS)
   @ELLoading()
@@ -50,6 +54,12 @@ export class TeacherService {
       u.student && (u.student = JSON.stringify(u.student))
     })
     const data = await usePatch<User[]>('teacher/students', JSON.stringify(users))
+    return data.data.value?.data as unknown as User[]
+  }
+
+  //重置学生密码
+  static async resetPassword(number: string) {
+    const data = await usePut<User[]>(`teacher/passwords/${number}`)
     return data.data.value?.data as unknown as User[]
   }
   //获取指导学生
