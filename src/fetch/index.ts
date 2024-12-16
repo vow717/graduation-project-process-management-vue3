@@ -37,13 +37,15 @@ export const useFetch = createFetch({
     beforeFetch: ({ options }) => {
       //从sessionStorage中取值
       const token = sessionStorage.getItem('token')
+      console.log('BeforeFetch - Request Headers:', options.headers)
       if (token) {
         options.headers = {
           ...options.headers,
           token: token,
-          'Content-Type': 'application/json' //content-type是请求头的一种，用来指定请求体的格式
+          xtoken: sessionStorage.getItem('xtoken') ?? ''
         }
       }
+
       return { options }
     },
     afterFetch: (ctx) => {

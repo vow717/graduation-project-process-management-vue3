@@ -19,7 +19,12 @@ processesS.value?.forEach((pr) => {
   menus.push({ name: pr.name!, path: `/student/processes/${pr.id}` })
 })
 
-const activeIndexR = ref('1')
+const route = useRoute()
+const activeIndexR = ref('')
+watch(route, () => {
+  const p = menus.find((mn) => route.path.includes(mn.path))
+  activeIndexR.value = p?.path ?? ''
+})
 </script>
 <template>
   <div>

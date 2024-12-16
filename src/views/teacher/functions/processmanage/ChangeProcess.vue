@@ -190,7 +190,7 @@ const closeF = () => render(null, document.body)
       <el-button
         type="success"
         @click="addProcessF"
-        :disabled="!pointOk || !processR.name || !processR.auth || processR.point! > prop.allPoint"
+        :disabled="!pointOk || !processR.name || !processR.auth"
         >确定</el-button
       >
     </template>
