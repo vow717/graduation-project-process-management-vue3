@@ -111,20 +111,20 @@ const addProcessScoreF = (ps: ProcessScore) => {
 
 // --------------------
 // 附件
-/*
-const studentAttaches = processesS.value.find((ps) => ps.id == params.id)?.attach
-const processFileC = computed(
-  () => (sid: string, number: number) =>
-    processFilesS.value!.find((pf) => pf.studentId == sid && pf.number == number)
-)
 
-const clickAttachF = async (sid: string, number: number) => {
-  const pname = processFilesS.value!.find(
-    (pf) => pf.studentId == sid && pf.number == number
-  )?.detail
-  pname && (await TeacherService.getProcessFileService(pname))
-}
-*/
+// const studentAttaches = processesS.value.find((ps) => ps.id == params.id)?.attach
+// const processFileC = computed(
+//   () => (sid: string, number: number) =>
+//     processFilesS.value!.find((pf) => pf.studentId == sid && pf.number == number)
+// )
+
+// const clickAttachF = async (sid: string, number: number) => {
+//   const pname = processFilesS.value!.find(
+//     (pf) => pf.studentId == sid && pf.number == number
+//   )?.detail
+//   pname && (await TeacherService.getProcessFilesService(pname))
+// }
+
 // --------------------
 // 评分
 const gradingDialog = defineAsyncComponent(() => import('./GradingDialog.vue'))

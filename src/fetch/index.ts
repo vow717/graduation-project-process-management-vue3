@@ -41,8 +41,7 @@ export const useFetch = createFetch({
       if (token) {
         options.headers = {
           ...options.headers,
-          token: token,
-          xtoken: sessionStorage.getItem('xtoken') ?? ''
+          token: token
         }
       }
 
@@ -65,8 +64,10 @@ export const useFetch = createFetch({
   }
 })
 
-export async function usePost<T>(url: string, data: unknown) {
-  const resp = useFetch(url, { immediate: false }).post(data).json<ResultVO<T>>()
+export async function usePost<T>(url: string, data: unknown, headers?: { [key: string]: string }) {
+  const resp = useFetch(url, { headers: headers }, { immediate: false })
+    .post(data)
+    .json<ResultVO<T>>()
   await resp.execute(true)
   return resp
 }

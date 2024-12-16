@@ -100,10 +100,41 @@ export class TeacherService {
     return data.data.value?.data as unknown as ProcessFile[]
   }
 
+  // //下载文件,并且显示进度条,progressR是一个ref对象，用于存储进度条的数据
+  // static getProcessFilesService=async(pid: string) {
+  //   const pname = encodeURIComponent(name)
+  //   const progressR = ref<{ progress: Progress }>({
+  //     progress: { percentage: 0, title: name, rate: 0, total: 0, loaded: 0 }
+  //   })
+  //   const progNotif = createProgressNotification(progressR.value)
+  //   const resp = await axios.get(`${TEACHER}/download/${pname}`, {
+  //     responseType: 'blob',
+  //     onDownloadProgress(ProgressEvent) {
+  //       if (!ProgressEvent) return
+  //       progressR.value.progress.percentage = ProgressEvent.progress ?? 0
+  //       progressR.value.progress.rate = ProgressEvent.rate ?? 0
+  //       progressR.value.progress.loaded = ProgressEvent.loaded ?? 0
+  //       progressR.value.progress.total = ProgressEvent.total ?? 0
+  //     }
+  //   })
+  //   progNotif.close()
+  //   const filename = decodeURIComponent(resp.headers['filename'])
+  //   const url = window.URL.createObjectURL(new Blob([resp.data]))
+  //   const link = document.createElement('a')
+  //   link.href = url
+  //   link.setAttribute('download', filename)
+  //   document.body.appendChild(link)
+  //   link.click()
+
+  //   window.URL.revokeObjectURL(url)
+  //   document.body.removeChild(link)
+  // }
+
   @ELLoading()
   @ClearStoreCache(useProcessInfosStore().clear)
   @storeCacheMapFactory(useProcessInfosStore().processScoresMapS, [0, 1])
   static async addProcessScoreService(pid: string, auth: string, ps: ProcessScore) {
+    //@ts-ignore
     ps.detail = JSON.stringify(ps.detail)
     const data = await usePost<ProcessScore[]>(`teacher/processscores/types/${auth}`, ps)
     return data.data.value?.data as unknown as ProcessScore[]
@@ -118,9 +149,11 @@ export class TeacherService {
 
   @storeCacheFactory(useProcessStore().processesS, false)
   static async addProcessService(ps: Process) {
+    //@ts-ignore
     ps.items = JSON.stringify(ps.items)
+    //@ts-ignore
     ps.studentAttach = JSON.stringify(ps.studentAttach)
-    console.log('111')
+
     const data = await usePost<Process[]>('teacher/processes', ps)
     console.log(data)
     return data.data.value?.data as unknown as Process[]

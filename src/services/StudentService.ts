@@ -3,13 +3,9 @@ import { useGet, usePost } from '@/fetch'
 
 export class StudentService {
   static async uploadFileService(pid: string, number: number, encoder: string, fdate: FormData) {
-    console.log('1')
-    //将encoder写作xtoken存到sessionStorage中,方便beforeFetch中取值并设置请求头
-    sessionStorage.setItem('xtoken', encoder)
-    const resp = await usePost<ProcessFile[]>(`student/upload/${pid}/numbers/${number}`, fdate)
-    console.log('2')
-    //上传成功后清除sessionStorage中的xtoken
-    sessionStorage.removeItem('xtoken')
+    const resp = await usePost<ProcessFile[]>(`student/upload/${pid}/numbers/${number}`, fdate, {
+      xtoken: encoder
+    })
     return resp.data.value?.data as ProcessFile[]
   }
 
