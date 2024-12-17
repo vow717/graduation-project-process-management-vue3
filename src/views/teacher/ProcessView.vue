@@ -3,6 +3,7 @@ import { PA_REVIEW } from '@/datasource/const'
 import type {
   LevelCount,
   Process,
+  ProcessFile,
   ProcessScore,
   PSDetailTeacher,
   StudentProcessScore,
@@ -11,6 +12,7 @@ import type {
 import { CommonService } from '@/services'
 import { TeacherService } from '@/services/TeacherService'
 import { useUserStore } from '@/stores/UserStore'
+import { Box, Brush } from '@element-plus/icons-vue'
 import { defineAsyncComponent, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import GroupTeachersView from './GroupTeachersView.vue'
@@ -21,18 +23,18 @@ const result = await Promise.all([
     ? TeacherService.listGroupStudentsService()
     : TeacherService.listTutorStudentsService(),
   TeacherService.listProcessesProcessScoresService(params.pid, params.auth),
-  CommonService.listProcessesService()
-  // TeacherService.listProcessFilesService(params.pid, params.auth)
+  CommonService.listProcessesService(),
+  TeacherService.listProcessFilesService(params.pid, params.auth)
 ])
 const studentsS = ref<User[]>()
 const processscoresS = ref<ProcessScore[]>()
 const processesS = ref<Process[]>()
-// const processFilesS = ref<ProcessFile[]>()
+const processFilesS = ref<ProcessFile[]>()
 studentsS.value = result[0]
 processscoresS.value = result[1]
 processesS.value = result[2]
-// processFilesS.value = result[3]
-
+processFilesS.value = result[3]
+console.log('processFilesS:{}', processFilesS.value)
 const levelCount = ref<LevelCount>({
   score_last: 0,
   score_60: 0,
@@ -112,18 +114,18 @@ const addProcessScoreF = (ps: ProcessScore) => {
 // --------------------
 // 附件
 
-// const studentAttaches = processesS.value.find((ps) => ps.id == params.id)?.attach
-// const processFileC = computed(
-//   () => (sid: string, number: number) =>
-//     processFilesS.value!.find((pf) => pf.studentId == sid && pf.number == number)
-// )
+const studentAttaches = processesS.value.find((ps) => ps.id == params.pid)?.studentAttach
+const processFileC = computed(
+  () => (sid: string, number: number) =>
+    processFilesS.value!.find((pf) => pf.studentId == sid && pf.number == number)
+)
 
-// const clickAttachF = async (sid: string, number: number) => {
-//   const pname = processFilesS.value!.find(
-//     (pf) => pf.studentId == sid && pf.number == number
-//   )?.detail
-//   pname && (await TeacherService.getProcessFilesService(pname))
-// }
+const clickAttachF = async (sid: string, number: number) => {
+  const pname = processFilesS.value!.find(
+    (pf) => pf.studentId == sid && pf.number == number
+  )?.detail
+  pname && (await TeacherService.getProcessFilesService(pname))
+}
 
 // --------------------
 // 评分
@@ -168,7 +170,7 @@ const closeF = () => (gradingDialogVisable.value = false)
           {{ (scope.row as StudentProcessScore).student?.student?.projectTitle }}
         </template>
       </el-table-column>
-      <!--
+
       <el-table-column label="附件">
         <template #default="scope">
           <template v-for="(attach, index) of studentAttaches" :key="index">
@@ -185,7 +187,7 @@ const closeF = () => (gradingDialogVisable.value = false)
           </template>
         </template>
       </el-table-column>
-    -->
+
       <el-table-column label="评分/平均分">
         <template #default="scope">
           {{ scope.row.currentTeacherScore }} /

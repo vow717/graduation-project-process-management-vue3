@@ -1,4 +1,5 @@
-import type { Process, ProcessFile, ProcessScore, User } from '@/datasource/type'
+import { createProgressNotification } from '@/components/progress'
+import type { Process, ProcessFile, ProcessScore, Progress, User } from '@/datasource/type'
 import { useDelete, useGet, usePatch, usePost, usePut } from '@/fetch'
 import { useInfosStore } from '@/stores/InfosStore'
 import { useProcessInfosStore } from '@/stores/ProcessInfosStore'
@@ -129,6 +130,65 @@ export class TeacherService {
   //   window.URL.revokeObjectURL(url)
   //   document.body.removeChild(link)
   // }
+
+  static async getProcessFilesService(name: string) {
+    const pname = encodeURIComponent(name)
+    const progressR = ref<{ progress: Progress }>({
+      progress: { percentage: 0, title: name, rate: 0, total: 0, loaded: 0 }
+    })
+    const progNotif = createProgressNotification(progressR.value)
+
+    const response = await fetch(`/api/teacher/download/${pname}`, {
+      method: 'GET',
+      headers: {
+        token: sessionStorage.getItem('token') || ''
+      }
+    })
+    console.log(response)
+    if (!response.body) {
+      throw new Error('Response body is null')
+    }
+    const reader = response.body.getReader()
+    const contentLength = response.headers.get('Content-Length')
+    const total = contentLength ? parseInt(contentLength, 10) : 0
+
+    const readData = async () => {
+      let receivedLength = 0
+      const chunks = []
+      const startTime = Date.now()
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) {
+          break
+        }
+        chunks.push(value)
+        receivedLength += value.length
+        progressR.value.progress.loaded = receivedLength
+        progressR.value.progress.total = total
+        progressR.value.progress.percentage = Math.round((receivedLength / total) * 100)
+        // 计算经过的时间
+        const elapsedTime = Date.now() - startTime
+        // 避免除以0的情况，如果时间为0，速率设为0
+        const rate = elapsedTime > 0 ? receivedLength / elapsedTime : 0
+        progressR.value.progress.rate = rate * 1000
+      }
+      return new Blob(chunks)
+    }
+
+    const blob = await readData()
+    progNotif.close() // 关闭进度条
+
+    const filename = decodeURIComponent(response.headers.get('filename') ?? '')
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', filename)
+    document.body.appendChild(link)
+    link.click()
+
+    URL.revokeObjectURL(url)
+    document.body.removeChild(link)
+  }
 
   @ELLoading()
   @ClearStoreCache(useProcessInfosStore().clear)

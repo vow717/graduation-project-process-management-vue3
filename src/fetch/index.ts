@@ -37,23 +37,27 @@ export const useFetch = createFetch({
     beforeFetch: ({ options }) => {
       //从sessionStorage中取值
       const token = sessionStorage.getItem('token')
-      console.log('BeforeFetch - Request Headers:', options.headers)
       if (token) {
         options.headers = {
           ...options.headers,
           token: token
         }
       }
-
       return { options }
     },
     afterFetch: (ctx) => {
+      //如果是blob类型的数据，直接返回，因为下载文件不需要处理（后端是MediaType.APPLICATION_OCTET_STREAM）
+      if (ctx.response.headers.get('Content-Type')?.includes('application/octet-stream')) {
+        console.log('blob data')
+        return ctx
+      }
       const data: ResultVO<{}> = ctx.data
       if (data.code != 200) {
         return Promise.reject(data.message)
       }
       // 调用 parseObject 函数对数据进行处理
       parseObject(data)
+      console.log('data.data', data.data)
       return ctx
     },
     onFetchError: (ctx) => {

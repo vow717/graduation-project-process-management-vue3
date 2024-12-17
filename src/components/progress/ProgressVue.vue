@@ -2,8 +2,10 @@
 import type { Progress } from '@/datasource/type'
 import { computed } from 'vue'
 const prop = defineProps<{ progress: Progress }>()
-const percentageC = computed(() => Math.round(prop.progress.percentage * 100))
-const rateC = computed(() => toFixed2(prop.progress.rate))
+const percentageC = computed(() => Math.round(prop.progress.percentage))
+const rateC = computed(() => {
+  return toFixed2(prop.progress.rate)
+})
 const totalC = computed(() => toFixed2(prop.progress.total))
 const loadedC = computed(() => toFixed2(prop.progress.loaded))
 

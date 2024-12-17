@@ -109,3 +109,9 @@ export interface ResultVO<T> {
   message?: string
   data?: T
 }
+
+//这是一个下载文件的返回值类型
+export interface DownloadResult {
+  data: Blob | null
+  headers: Headers
+}

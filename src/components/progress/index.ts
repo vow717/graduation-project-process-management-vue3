@@ -5,10 +5,10 @@ import ProgressVue from './ProgressVue.vue'
 
 export const createProgressNotification = (progress: { progress: Progress }) => {
   const noti = ElNotification({
-    title: 'Loading',
+    title: '下载进度',
     message: h(ProgressVue, progress),
     type: 'success',
-    duration: 0
+    duration: 0 // 不自动关闭
   })
 
   const close = () => noti.close()
