@@ -34,7 +34,7 @@ const updateF = async () => {
     <br />
     <template v-if="userInfo.id">
       <p>姓名：{{ userInfo.name }}</p>
-      <p>
+      <p v-if="userInfo.student">
         项目名称：
         <el-input
           v-model="userInfo.student.projectTitle"
@@ -47,16 +47,18 @@ const updateF = async () => {
         <el-input type="number" v-model="userInfo.groupNumber" style="width: 150px" />
       </p>
       <p>
-        导师选择：
-        <el-select v-model="userInfo.student.teacherName" style="width: 150px">
-          <el-option
-            v-for="teacher in teachersR"
-            :key="teacher.id"
-            :value="teacher.name"
-            :label="teacher.name"
-            >{{ teacher.name }}</el-option
-          >
-        </el-select>
+        <template v-if="userInfo.student">
+          导师选择：
+          <el-select v-model="userInfo.student.teacherName" style="width: 150px">
+            <el-option
+              v-for="teacher in teachersR"
+              :key="teacher.id"
+              :value="teacher.name"
+              :label="teacher.name"
+              >{{ teacher.name }}</el-option
+            >
+          </el-select>
+        </template>
       </p>
       <br />
       <el-button type="primary" @click="updateF">更新信息</el-button>

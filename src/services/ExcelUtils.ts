@@ -80,7 +80,7 @@ export function exportGroupExcelFile(map: Map<number, any[]>, filename: string) 
   const workbook = XLSX.utils.book_new()
   console.log(map)
   map.forEach((value, key) => {
-    const students = value[0].map((stu) => {
+    const students = value[0].map((stu: any) => {
       console.log(stu)
       return {
         序号: stu.queueNumber,
@@ -90,7 +90,7 @@ export function exportGroupExcelFile(map: Map<number, any[]>, filename: string) 
         毕设题目: stu.projectTitle
       }
     })
-    students.sort((a, b) => a['序号'] - b['序号'])
+    students.sort((a: any, b: any) => a['序号'] - b['序号'])
     const jsonWorkSheet = XLSX.utils.json_to_sheet(students)
     jsonWorkSheet['!cols'] = [{ wpx: 50 }, { wpx: 100 }, { wpx: 100 }, { wpx: 100 }, { wpx: 200 }]
 

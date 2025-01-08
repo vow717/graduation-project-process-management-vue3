@@ -57,7 +57,7 @@ const studentsC = allStudentsR.value!.slice(totalA + totalB, totalA + totalB + t
 
 const distributeF = (students: User[], level: 'A' | 'B' | 'C') => {
   //复制一份老师列表,用这个列表来分配学生，一旦老师的A/B/C的学生分配完毕，就从这个列表中删除
-  const teachersTemp = [...teachersR.value.filter((t) => t[level] > 0)]
+  const teachersTemp = [...teachersR.value.filter((t) => (t[level] ?? 0) > 0)]
 
   const teachersTempCopy = [...teachersTemp]
   students.forEach((student) => {

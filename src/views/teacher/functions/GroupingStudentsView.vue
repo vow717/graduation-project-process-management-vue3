@@ -69,14 +69,16 @@ const groupStudentsF = () => {
         name: student.name,
         student: {
           ...student.student,
-          queueNumber: mapGroup.value.get(groupNumber)?.length + 1
+          queueNumber: (mapGroup.value.get(groupNumber)?.length ?? 0) + 1
         }
       }
       updateStudentsR.value.push(nowStudent)
       mapGroup.value.get(groupNumber)?.push(nowStudent)
       //向上取整：Math.ceil()，向下取整：Math.floor()，四舍五入：Math.round()
       //如果某个组的学生数等于总学生数除以组数，那么就从chooseGroupCopy中暂时删除这个组
-      if (mapGroup.value.get(groupNumber)?.length > Math.ceil(studentsCount.value / groupCount)) {
+      if (
+        (mapGroup.value.get(groupNumber)?.length ?? 0) > Math.ceil(studentsCount.value / groupCount)
+      ) {
         chooseGroup = chooseGroup.filter((g) => g !== groupNumber)
       }
     }
@@ -111,7 +113,7 @@ const downloadF = () => {
     data.push([[]])
   }
   studentsR.value.forEach((student) => {
-    data[student.groupNumber - 1][0].push({
+    data[(student.groupNumber ?? 0) - 1][0].push({
       number: student.number,
       name: student.name,
       teacherName: student.student?.teacherName,
@@ -119,7 +121,7 @@ const downloadF = () => {
       projectTitle: student.student?.projectTitle
     })
   })
-  exportGroupExcelFile(data, '学生分组表格')
+  exportGroupExcelFile(data as unknown as Map<number, any[]>, '学生分组表格')
 }
 </script>
 <template>
