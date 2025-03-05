@@ -7,10 +7,10 @@ jobs:
 
     steps:
       - name: 读取仓库内容
-      - uses: actions/checkout@v4
+        uses: actions/checkout@v4
 
       - name: 安装依赖
-      - run: npm install
+        run: npm install
 
       - name: 项目打包
-      - run: run build
+        run: run build
