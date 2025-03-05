@@ -9,4 +9,4 @@ jobs:
   job2:
     runs-on: windows-latest
     steps:
-      - run node --version
+      - run: node --version
