@@ -30,6 +30,7 @@ declare module 'vue' {
     ElTabs: typeof import('element-plus/es')['ElTabs']
     ElTag: typeof import('element-plus/es')['ElTag']
     ElText: typeof import('element-plus/es')['ElText']
+    ElUpload: typeof import('element-plus/es')['ElUpload']
     LoadingView: typeof import('./src/components/LoadingView.vue')['default']
     ProgressVue: typeof import('./src/components/progress/ProgressVue.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

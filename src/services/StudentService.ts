@@ -22,4 +22,24 @@ export class StudentService {
     const data = await useGet<ProcessFile[]>(`student/processfiles/${pid}`)
     return data.data.value?.data as unknown as ProcessFile[]
   }
+
+  // 上传头像服务
+  static async uploadAvatarService(formData: FormData) {
+    const resp = await usePost(`avatar`, formData)
+    return resp.data // 返回响应数据
+  }
+
+  // 获取头像服务
+  static async getAvatarService() {
+    const response = await fetch(`/api/avatar`, {
+      method: 'GET',
+      headers: {
+        token: sessionStorage.getItem('token') || '' // 如果需要token
+      }
+    })
+    if (!response.ok) {
+      throw new Error('Failed to fetch avatar')
+    }
+    return response.blob() // 返回Blob数据
+  }
 }
