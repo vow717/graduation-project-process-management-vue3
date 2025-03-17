@@ -60,5 +60,4 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           # cd /home/services/se-invigilation/
           # docker-compose up --force-recreate --no-deps -d nginx
-          # cd
           script: ${{ secrets.RECREATE_CONTAINER }}
