@@ -1,0 +1,63 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Node.js CI
+
+# 监听main分支push和pull_request事件，触发时执行jobs
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+
+jobs:
+  build:
+    # 选择运行环境
+    runs-on: ubuntu-latest
+
+    # 选择node版本
+    strategy:
+      matrix:
+        node-version: [20.14.0]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    # 任务
+    steps:
+      # 利用官方actions/checkout仓库，将代码仓库的代码拉取到runner
+      - uses: actions/checkout@v4
+      # 安装node
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      # 安装依赖,构建dist
+      - run: npm ci
+      - run: npm run build --if-present
+
+      # copy dist to server
+      - name: copy file via ssh password
+        # 通过SFPT协议将dist目录下的文件复制到服务器
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }} # 服务器ip地址
+          username: ${{ secrets.USER }} # 服务器用户名
+          password: ${{ secrets.PASSWORD }} # 服务器密码
+          source: 'dist/*'
+          target: ${{ secrets.TARGET }} # 服务器目标路径，我阿里云是www/wwwroot/项目名
+          # 仅复制文件，不复制目录，
+          # 为1时，复制文件时会去掉dist目录，为0时，复制文件时会保留dist目录
+          strip_components: 1
+          # 是否覆盖目标文件
+          rm: true
+      # 通过ssh执行远程命令，重启docker容器，重新加载nginx配置，具体命令在secrets中配置
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          password: ${{ secrets.PASSWORD }}
+          # cd /home/services/se-invigilation/
+          # docker-compose up --force-recreate --no-deps -d nginx
+          script: ${{ secrets.RECREATE_CONTAINER }}

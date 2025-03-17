@@ -64,7 +64,7 @@ const uploadF = async () => {
   if (!userS.value) {
     return
   }
-  //这里的fileName是上传文件的名字，格式为：学号-姓名-学号-附件名
+  //这里的fileName是上传文件的名字，格式为：组号-姓名-学号-附件名
   const fileName = `${userS.value.student?.queueNumber}-${userS.value.name}-${userS.value.number}-${selectAttachR.value?.name}${ext}`
   if (fileName.includes('/') || fileName.includes('\\')) {
     createElNotificationError('文件名不符合要求')
