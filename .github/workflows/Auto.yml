@@ -47,7 +47,7 @@ jobs:
           source: 'dist/*'
           target: ${{ secrets.TARGET }} # 服务器目标路径，我阿里云是/root/www/wwwroot/项目名
           # 仅复制文件，不复制目录，
-          # 为1时，复制文件时会去掉dist目录，为0时，复制文件时会保留dist目录
+          # 为1时，复制文件时会去掉dist目录，为0时会保留dist目录
           strip_components: 1
           # 是否覆盖目标文件
           rm: true
