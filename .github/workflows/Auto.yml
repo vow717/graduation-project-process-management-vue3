@@ -45,7 +45,7 @@ jobs:
           username: ${{ secrets.USER }} # 服务器用户名
           password: ${{ secrets.PASSWORD }} # 服务器密码
           source: 'dist/*'
-          target: ${{ secrets.TARGET }} # 服务器目标路径，我阿里云是www/wwwroot/项目名
+          target: ${{ secrets.TARGET }} # 服务器目标路径，我阿里云是/root/www/wwwroot/项目名
           # 仅复制文件，不复制目录，
           # 为1时，复制文件时会去掉dist目录，为0时，复制文件时会保留dist目录
           strip_components: 1
@@ -58,6 +58,6 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           password: ${{ secrets.PASSWORD }}
-          # cd /home/services/se-invigilation/
+          # cd /root/www/wwwroot/gpgm
           # docker-compose up --force-recreate --no-deps -d nginx
           script: ${{ secrets.RECREATE_CONTAINER }}
