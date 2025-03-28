@@ -41,7 +41,7 @@ export const useFetch = createFetch({
         options.headers = {
           ...options.headers,
           token: token
-          //'Content-Type': 'application/json'
+          // 'Content-Type': 'application/json'
         }
       }
       return { options }

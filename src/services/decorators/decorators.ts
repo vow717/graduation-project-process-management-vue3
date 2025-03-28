@@ -27,7 +27,9 @@ export const storeCacheFactory = (dataR: Ref<any>, doStore = true): MethodDecora
   }
 }
 
-//keyJoin是一个数组，里面存放的是要拼接的args的索引值
+//keyJoin是一个数组，里面存放的是要拼接的args的索引值，比如keyJoin=[0,1]，就是拼接args[0]和args[1]作为key值
+//为什么要这么做呢：因为有多个processFiles和processScores要缓存，map根据processId找更快
+//如果keyJoin存在，就用keyJoin对应的那几个args作为key值，否则就默认全部args拼接作为key值
 export const storeCacheMapFactory = (
   dataR: Ref<Map<any, any>>,
   keyJoin?: number[]

@@ -50,6 +50,36 @@ const changeF = (e: Event) => {
   }
 }
 
+const bigFileUploadF = async () => {
+  if (!fileR.value || !selectAttachR.value) {
+    createElNotificationError('请先选择文件')
+    return
+  }
+  const fName = fileR.value.name
+  const ext = fName.substring(fName.lastIndexOf('.'))
+  if (!selectAttachR.value?.ext?.includes(ext)) {
+    createElNotificationError('文件类型不符合要求,请转为' + selectAttachR.value.ext)
+    return
+  }
+  if (!userS.value) {
+    return
+  }
+  //这里的fileName是上传文件的名字，格式为：组号-姓名-学号-附件名
+  const fileName = `${userS.value.student?.queueNumber}-${userS.value.name}-${userS.value.number}-${selectAttachR.value?.name}${ext}`
+  if (fileName.includes('/') || fileName.includes('\\')) {
+    createElNotificationError('文件名不符合要求')
+    return
+  }
+  StudentService.uploadFileByChunksService(
+    fileR.value,
+    fileName,
+    selectAttachR.value.number!,
+    params.pid,
+    selectAttachR.value?.name!
+  )
+}
+
+//小文件＋base64签名上传
 const uploadF = async () => {
   if (!fileR.value || !selectAttachR.value) {
     createElNotificationError('请先选择文件')
@@ -72,12 +102,12 @@ const uploadF = async () => {
   }
   const fdata = new FormData()
   //fdata是一个FormData对象，用来存储上传的文件,append方法用来添加键值对
-  //这里的键值对是：pname:附件名，file:文件
-  //fdata.append('pname',selectAttachR.value?.name ?? '')是为了在后端获取附件名
+  //这里的键值对是：pname:要交的文件类名，比如开题答辩ppt这样的，file:文件
+  //fdata.append('pname',selectAttachR.value?.name ?? '')是为了在后端获取文件类名
   //fdata.append('file',fileR.value,fileName)是为了在后端获取文件，其中fileName是上传文件的名字编码
   fdata.append('pname', selectAttachR.value?.name ?? '')
   fdata.append('file', fileR.value, fileName)
-  console.log(fdata.get('pname'))
+  console.log('pname', fdata.get('pname'))
   //这里的sign是一个签名，用来保证上传文件的安全性
   const sign = await StudentService.uploadFileSignatureService(
     `${params.pid}${selectAttachR.value?.name}${fileName}${selectAttachR.value?.number!}`
@@ -122,6 +152,9 @@ const uploadF = async () => {
 
     <input type="file" ref="fileInputR" hidden :accept="selectAttachR?.ext" @change="changeF" />
     <el-button type="success" @click="uploadF" :icon="Check" style="margin-right: 10px" />
+    <el-button type="info" @click="bigFileUploadF" :icon="Check" style="margin-right: 10px"
+      >文件较大请点击分片上传</el-button
+    >
     <span>{{ fileR?.name }}</span>
   </div>
 </template>
