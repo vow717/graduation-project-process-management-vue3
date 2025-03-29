@@ -9,6 +9,9 @@ import viteCompression from 'vite-plugin-compression'
 //npm install vite-plugin-compression -D 用于压缩文件
 // https://vitejs.dev/config/
 export default defineConfig({
+  worker: {
+    format: 'es' // worker 线程使用 ES 模块格式
+  },
   plugins: [
     vue(),
     AutoImport({
@@ -20,6 +23,7 @@ export default defineConfig({
     }),
     /*
     参数含义如下：
+    ViteCompression 插件用于压缩构建后的文件，减少文件体积，提高加载速度。
 verbose：是一个布尔值，设为true时，会在控制台输出压缩相关的详细信息，如哪些文件被压缩等。
 disable：也是布尔值，设为false表示启用压缩功能。如果设为true，则不会进行压缩。
 threshold：表示只有文件大小大于这个值（单位是字节）的文件才会被压缩。这里设为10240，即 10KB，意味着小于 10KB 的文件不会被压缩。

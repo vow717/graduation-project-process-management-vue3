@@ -58,7 +58,6 @@ export const useFetch = createFetch({
       }
       // 调用 parseObject 函数对数据进行处理
       parseObject(data)
-      console.log('data.data', data.data)
       return ctx
     },
     onFetchError: (ctx) => {

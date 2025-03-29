@@ -77,6 +77,9 @@ const bigFileUploadF = async () => {
     params.pid,
     selectAttachR.value?.name!
   )
+  createElNotificationSuccess('上传成功')
+  visableSubmitR.value = false
+  ;(fileInputR.value as HTMLInputElement).value = ''
 }
 
 //小文件＋base64签名上传

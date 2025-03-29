@@ -1,6 +1,5 @@
 import type { ProcessFile } from '@/datasource/type'
 import { useGet, usePost } from '@/fetch'
-import SparkMD5 from 'spark-md5'
 
 export class StudentService {
   static async uploadFileService(pid: string, number: number, encoder: string, fdate: FormData) {
@@ -48,7 +47,7 @@ export class StudentService {
   //---------------大文件分片上传------------------
   // 创建文件切片
   static createChunks = (file: File) => {
-    const CHUNK_SIZE = 1024 * 50 // 50kb
+    const CHUNK_SIZE = 1024 * 500 // 500kb
     let cur: number = 0
     const chunks: Blob[] = []
     while (cur < file.size) {
@@ -61,35 +60,26 @@ export class StudentService {
   }
 
   // 计算文件 hash 值
-  // 切完片，要进行 hash 计算
-  // 首先我们考虑，怎么样去区分一个不同的文件呢？首先文件名字肯定是不行的，因为文件名是可以修改的。我们可以考虑文件的内容，文件的内容是不会变的。我们可以对文件进行 hash 计算，计算出一个 hash 值，这个 hash 值就是这个文件的唯一标识符。
-  // 我们可以使用 md5 算法来计算文件的 hash 值。md5 算法是一个常用的 hash 算法，可以将任意长度的数据转换为一个 hash 值。我们可以使用 spartk-md5 这个库来计算文件的 hash 值。
-  // import SparkMD5 from 'spark-md5'
-  // 借助这个 hash 值，我们还可以实现秒传输的功能。我们可以先计算出文件的 hash 值，然后将 hash 值传给后端，后端根据 hash 值判断这个文件是否已经存在，如果存在就直接不用处理上传请求了，给用户的感觉就好像是秒传了一样。
   static calculateHash = (chunks: Blob[]) => {
     return new Promise((resolve, reject) => {
-      // 考虑到文件可能会很大，不能用全部的数据来计算 hash 值，那么我们可以只用文件的前面，中间，后面各 2 个字节来计算 hash 值。这样就可以大大减少计算 hash 值的时间了。
-      // 第一个和最后一个切片参与计算，而中间的切片只计算前面，中间，后面各 2 个字节
-      const targets: Blob[] = [] // 存储所有参与计算的切片
-      chunks.forEach((chunk, index) => {
-        if (index === 0 || index === chunks.length - 1) {
-          targets.push(chunk)
-        } else {
-          targets.push(chunk.slice(0, 2))
-          targets.push(chunk.slice(chunk.size - 2))
-          targets.push(chunk.slice(chunk.size / 2 - 2, chunk.size / 2 + 2))
-        }
+      /// 这里我们使用 web worker 来计算 hash 值，因为计算 hash 值是一个耗时的操作，如果在主线程中计算会导致页面卡顿，所以我们使用 web worker 来计算 hash 值。
+      //new URl('@/workers/hash.worker.ts', import.meta.url) 是一个 ES6 模块的语法，表示在当前模块中引入一个新的模块。type: 'module' 是一个选项，表示这个模块是一个 ES6 模块。
+      const worker = new Worker(new URL('@/workers/hash.worker.ts', import.meta.url), {
+        type: 'module'
       })
-      const spark = new SparkMD5.ArrayBuffer()
-      const fileReader = new FileReader()
-      fileReader.readAsArrayBuffer(new Blob(targets))
-      fileReader.onload = () => {
-        spark.append(fileReader.result as ArrayBuffer)
-        resolve(spark.end())
+      worker.onmessage = (e: MessageEvent<{ hash?: string; error?: string }>) => {
+        if (e.data.error) {
+          reject(new Error(e.data.error))
+        } else if (e.data.hash) {
+          resolve(e.data.hash)
+        }
+        worker.terminate() // 计算完成后，终止 worker
       }
-      fileReader.onerror = (error) => {
-        reject(new Error('Error reading file: ' + error))
+      worker.onerror = (error: ErrorEvent) => {
+        reject(new Error(error.message))
+        worker.terminate() // 计算完成后，终止 worker
       }
+      worker.postMessage({ chunks }) // 发送切片数据给 worker
     })
   }
 
@@ -128,7 +118,7 @@ export class StudentService {
         body: formData[currentIndex]
       })
         .then(() => {
-          console.log('完成一个')
+          // console.log('完成一个')
         })
         .catch((error) => {
           console.error('Upload error:', error)
@@ -149,6 +139,16 @@ export class StudentService {
     await Promise.all(taskPool)
   }
 
+  // 检查文件是否存在（秒传）
+  static async checkFileExists(hash: string) {
+    return usePost(`student/checkFile`, hash)
+  }
+
+  // 检查已上传分片
+  static async checkChunks(hash: String, pname: String) {
+    const resp = await usePost(`student/checkChunks/${pname}`, hash)
+    return resp.data.value?.data
+  }
   static async uploadFileByChunksService(
     file: File,
     fileName: string,
@@ -161,7 +161,19 @@ export class StudentService {
     // 过程 id 是为了区分不同的过程，过程名称是后端存储/创建文件夹用的
     const chunks = this.createChunks(file) // 切片
     const hash = (await this.calculateHash(chunks)) as string // 计算 hash 值
-    const formDataArray = this.generateFormData(chunks, hash, fileName, pname) // 生成 formData 数组
+
+    // 秒传
+    // 先检查文件是否存在，如果存在就直接返回
+    const data = (await this.checkFileExists(hash)) as any
+    if (data.data.value?.data.exists) {
+      console.log('文件已存在，秒传成功')
+      return // 秒传成功，直接返回
+    }
+    // 检查已上传分片
+    const checkChunks = (await this.checkChunks(hash, pname)) as any
+    console.log('已上传分片', checkChunks)
+    const needUploadChunks = chunks.filter((_, index) => !checkChunks.includes(index.toString())) // 需要上传的分片
+    const formDataArray = this.generateFormData(needUploadChunks, hash, fileName, pname) // 生成 formData 数组
     console.log('formDataArray', formDataArray)
     await this.uploadWithConcurrencyLimit(formDataArray) // 限制并发上传任务
     // 上传完成后，向后端发送一个请求，告诉后端文件上传完成
